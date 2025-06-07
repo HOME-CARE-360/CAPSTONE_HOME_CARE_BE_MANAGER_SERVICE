@@ -37,6 +37,5 @@
 
     COPY --from=development /usr/src/app/dist ./dist
     COPY --from=development /usr/src/app/node_modules /usr/src/app/node_modules
-    COPY proto proto
     CMD ["node", "dist/apps/manager/main"]
     
