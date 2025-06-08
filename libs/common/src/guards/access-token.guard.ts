@@ -57,7 +57,7 @@ export class AccessTokenGuard implements CanActivate {
                     }
                 }
             }
-        }).catch(() => { throw new ForbiddenExceptionRpc() })
+        }).catch(() => { throw ForbiddenExceptionRpc() })
         console.log(rolesWithPerms);
 
         const allPerms = rolesWithPerms.flatMap(r => r.permissions)
