@@ -12,7 +12,7 @@ export class PaymentAPIKeyGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const xAPIKey = request.headers['Authorization']?.split(' ')[1]
         if (xAPIKey !== this.configService.get("PAYMENT_API_KEY")) {
-            throw new UnauthorizedAccessException
+            throw UnauthorizedAccessException
         }
         return true
     }

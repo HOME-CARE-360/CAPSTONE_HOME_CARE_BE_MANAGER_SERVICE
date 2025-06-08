@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
 
 import { Reflector } from '@nestjs/core';
 import { AUTH_TYPE_KEY, AuthTypeDecoratorPayload } from '../decorator/auth.decorator';
