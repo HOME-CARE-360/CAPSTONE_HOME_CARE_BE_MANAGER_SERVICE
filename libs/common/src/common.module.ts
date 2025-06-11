@@ -4,9 +4,6 @@ import { HashingService } from './services/hashing.service';
 import { TokenService } from './services/token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AIService } from './services/AI.services';
-import { AccessTokenGuard } from './guards/access-token.guard';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthenticationGuard } from './guards/authentication.guard';
 import { PaymentAPIKeyGuard } from './guards/api-key.guard';
 import { EmailService } from './services/email.service';
 import { SharedUserRepository } from './repositories/shared-user.repo';
@@ -38,11 +35,7 @@ const sharedServices = [
 @Module({
   providers: [
     ...sharedServices,
-    AccessTokenGuard,
-    {
-      provide: APP_GUARD,
-      useClass: AuthenticationGuard,
-    },
+
   ],
   exports: sharedServices,
   imports: [JwtModule],
