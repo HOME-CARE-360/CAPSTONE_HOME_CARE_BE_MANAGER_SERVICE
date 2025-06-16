@@ -6,7 +6,7 @@ import { UpdateStatusProviderBodyDTO } from 'libs/common/src/request-response-ty
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
+import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -20,8 +20,18 @@ export class ManagersController {
   @MessagePattern({ cmd: "create-category" })
   @ZodSerializerDto(MessageResDTO)
   async createCategory(@Payload() { body, userId }: { body: CreateCategoryBodyType, userId: number }) {
-    const a = await this.managersService.createCategory(body, userId);
-    return a
+    await this.managersService.createCategory(body, userId);
+    return {
+      message: "Create category successfully"
+    }
+  }
+  @MessagePattern({ cmd: "update-category" })
+  @ZodSerializerDto(MessageResDTO)
+  async updateCategory(@Payload() { body, userId, categoryId }: { body: UpdateCategoryBodyType, userId: number, categoryId: number }) {
+    await this.managersService.updateCategory(body, userId, categoryId);
+    return {
+      message: "Update category successfully"
+    }
   }
 
 }

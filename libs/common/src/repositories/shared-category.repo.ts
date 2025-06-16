@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../services/prisma.service";
-import { CreateCategoryBodyType, GetListCategoryQueryType } from "../request-response-type/category/category.model";
+import { CreateCategoryBodyType, GetListCategoryQueryType, UpdateCategoryBodyType } from "../request-response-type/category/category.model";
 import { Prisma } from "@prisma/client";
 
 @Injectable()
@@ -56,6 +56,17 @@ export class SharedCategoryRepository {
 
 
     }
+    async updateCategory(body: UpdateCategoryBodyType, userId: number, categoryId: number) {
+        return await this.prismaService.category.update({
+            where: {
+                id: categoryId
+            },
+            data: {
+                ...body,
+                updatedById: userId
+            }
 
+        })
+    }
 
 }
