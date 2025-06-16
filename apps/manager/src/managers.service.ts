@@ -38,7 +38,7 @@ export class ManagersService {
   }
   async updateCategory(body: CreateCategoryBodyType, userId: number, categoryId: number) {
     const [categoryDbId, categoryDbName] = await Promise.all([this.categoriesRepository.findUnique([categoryId]), this.categoriesRepository.findUniqueName([body.name])])
-    if (categoryDbId.length > 0) throw InvalidCategoryIdException([categoryId])
+    if (categoryDbId.length < 1) throw InvalidCategoryIdException([categoryId])
     if (categoryDbName.length > 0) throw CategoryAlreadyExistException([body.name])
     return await this.categoriesRepository.createCategory(body, userId)
   }
