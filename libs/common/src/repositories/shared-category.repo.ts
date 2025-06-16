@@ -9,7 +9,8 @@ export class SharedCategoryRepository {
     async findUnique(categoryIds: number[]) {
         return await this.prismaService.category.findMany({
             where: {
-                id: { in: categoryIds }
+                id: { in: categoryIds },
+                deletedAt: null
             },
             select: { id: true }
         });
@@ -17,13 +18,16 @@ export class SharedCategoryRepository {
     async findUniqueName(categoryNames: string[]) {
         return await this.prismaService.category.findMany({
             where: {
-                name: { in: categoryNames }
+                name: { in: categoryNames },
+                deletedAt: null
             },
             select: { id: true }
         });
     }
     async findAllCategory(query: GetListCategoryQueryType) {
-        const where: Prisma.CategoryWhereInput = {}
+        const where: Prisma.CategoryWhereInput = {
+            deletedAt: null
+        }
         if (query.name) {
             where.name = query.name
         }
@@ -64,6 +68,18 @@ export class SharedCategoryRepository {
             data: {
                 ...body,
                 updatedById: userId
+            }
+
+        })
+    }
+    async deleteCategory(userId: number, categoryId: number) {
+        return await this.prismaService.category.update({
+            where: {
+                id: categoryId
+            },
+            data: {
+                deletedAt: new Date(),
+                createdById: userId
             }
 
         })

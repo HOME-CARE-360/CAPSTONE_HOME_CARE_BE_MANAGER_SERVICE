@@ -42,5 +42,10 @@ export class ManagersService {
     if (categoryDbName.length > 0) throw CategoryAlreadyExistException([body.name])
     return await this.categoriesRepository.createCategory(body, userId)
   }
+  async deleteCategory(userId: number, categoryId: number) {
+
+    if (await this.categoriesRepository.findUnique([categoryId])) throw InvalidCategoryIdException([categoryId])
+    return await this.categoriesRepository.deleteCategory(userId, categoryId)
+  }
 
 }

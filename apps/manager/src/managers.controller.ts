@@ -33,5 +33,13 @@ export class ManagersController {
       message: "Update category successfully"
     }
   }
+  @MessagePattern({ cmd: "delete-category" })
+  @ZodSerializerDto(MessageResDTO)
+  async Category(@Payload() { userId, categoryId }: { userId: number, categoryId: number }) {
+    await this.managersService.deleteCategory(userId, categoryId);
+    return {
+      message: "Delete category successfully"
+    }
+  }
 
 }
