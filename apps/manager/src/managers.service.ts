@@ -5,7 +5,7 @@ import { SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
-import { CreateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
+import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-category.repo';
 import { CategoryAlreadyExistException, InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 
@@ -36,15 +36,15 @@ export class ManagersService {
     if ((await this.categoriesRepository.findUniqueName([body.name])).length > 0) throw CategoryAlreadyExistException([body.name])
     return await this.categoriesRepository.createCategory(body, userId)
   }
-  async updateCategory(body: CreateCategoryBodyType, userId: number, categoryId: number) {
+  async updateCategory(body: UpdateCategoryBodyType, userId: number, categoryId: number) {
     const [categoryDbId, categoryDbName] = await Promise.all([this.categoriesRepository.findUnique([categoryId]), this.categoriesRepository.findUniqueName([body.name])])
     if (categoryDbId.length < 1) throw InvalidCategoryIdException([categoryId])
     if (categoryDbName.length > 0) throw CategoryAlreadyExistException([body.name])
-    return await this.categoriesRepository.createCategory(body, userId)
+    return await this.categoriesRepository.updateCategory(body, userId, categoryId)
   }
   async deleteCategory(userId: number, categoryId: number) {
 
-    if (await this.categoriesRepository.findUnique([categoryId])) throw InvalidCategoryIdException([categoryId])
+    if ((await this.categoriesRepository.findUnique([categoryId])).length < 1) throw InvalidCategoryIdException([categoryId])
     return await this.categoriesRepository.deleteCategory(userId, categoryId)
   }
 
