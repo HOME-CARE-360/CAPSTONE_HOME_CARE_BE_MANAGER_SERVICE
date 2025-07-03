@@ -13,7 +13,6 @@ export class AccessTokenGuard implements CanActivate {
         context: ExecutionContext,
     ): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-
         const decodedAccessToken = await this.extractAndValidateToken(request)
         console.log(decodedAccessToken);
 
@@ -35,8 +34,6 @@ export class AccessTokenGuard implements CanActivate {
     }
     private extractAccessTokenFromHeader(request: any): string {
         const accessToken = request.headers.authorization?.split(' ')[1]
-        console.log(accessToken);
-
         if (!accessToken) {
             throw MissingAccessTokenException
         }

@@ -2,11 +2,11 @@ import { Controller } from '@nestjs/common';
 import { ManagersService } from './managers.service';
 
 import { ZodSerializerDto } from 'nestjs-zod';
-import { UpdateStatusProviderBodyDTO } from 'libs/common/src/request-response-type/manager/managers.dto';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
+import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -14,8 +14,13 @@ export class ManagersController {
   constructor(private readonly managersService: ManagersService) { }
   @MessagePattern({ cmd: 'change-status-provider' })
   @ZodSerializerDto(MessageResDTO)
-  async updateStatusProvider(@Payload() { body, id }: { body: UpdateStatusProviderBodyDTO, id: number }) {
+  async updateStatusProvider(@Payload() { body, id }: { body: UpdateStatusProviderBodyType, id: number }) {
     return this.managersService.updateProviderStatus(body, id)
+  }
+  @MessagePattern({ cmd: 'change-status-service' })
+  @ZodSerializerDto(MessageResDTO)
+  async updateStatusService(@Payload() { body }: { body: UpdateStatusServiceBodyType }) {
+    return this.managersService.updateServiceStatus(body)
   }
   @MessagePattern({ cmd: "create-category" })
   @ZodSerializerDto(MessageResDTO)

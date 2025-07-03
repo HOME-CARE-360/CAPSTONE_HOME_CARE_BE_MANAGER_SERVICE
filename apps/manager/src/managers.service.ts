@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateStatusProviderBody } from 'libs/common/src/request-response-type/manager/manager.model';
+import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
 import { SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
@@ -17,7 +17,7 @@ export class ManagersService {
     private readonly managerRepository: ManagerRepository,
     private readonly categoriesRepository: SharedCategoryRepository
   ) { }
-  async updateProviderStatus(body: UpdateStatusProviderBody, userId: number) {
+  async updateProviderStatus(body: UpdateStatusProviderBodyType, userId: number) {
     const provider = await this.sharedProviderRepository.findUnique({ id: body.id })
     if (!provider) {
       throw ServiceProviderNotFoundException
@@ -29,6 +29,14 @@ export class ManagersService {
     await this.managerRepository.acceptProvider(body, userId)
     return {
       message: "Change status provider successfully"
+    }
+
+  }
+  async updateServiceStatus(body: UpdateStatusServiceBodyType) {
+
+    await this.managerRepository.updateStatusService(body)
+    return {
+      message: "Change status service successfully"
     }
 
   }
