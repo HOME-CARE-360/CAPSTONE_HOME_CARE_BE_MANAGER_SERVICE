@@ -1,4 +1,4 @@
-import { UnprocessableEntityException } from "@nestjs/common";
+import { BadRequestException, UnprocessableEntityException } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
 
 
@@ -11,3 +11,12 @@ export const ServiceNotFoundException = new RpcException(new UnprocessableEntity
     },
 ]))
 
+export function InvalidServiceIdException(serviceIds: number[]) {
+    return new RpcException(new BadRequestException([
+        {
+            message: 'Error.InvalidServiceId',
+            path: ['categoryRequirements'],
+            meta: { serviceIds },
+        },
+    ]));
+}
