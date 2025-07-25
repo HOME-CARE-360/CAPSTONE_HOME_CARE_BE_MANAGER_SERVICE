@@ -7,6 +7,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
+import { GetListWidthDrawQueryType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -47,4 +48,10 @@ export class ManagersController {
     }
   }
 
+  @MessagePattern({ cmd: "get-list-withdraw" })
+  @ZodSerializerDto(MessageResDTO)
+  async getListWithDraw(@Payload() query: GetListWidthDrawQueryType) {
+    return await this.managersService.getListWithDraw(query)
+
+  }
 }

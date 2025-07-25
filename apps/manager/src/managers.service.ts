@@ -8,6 +8,7 @@ import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-p
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-category.repo';
 import { CategoryAlreadyExistException, InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
+import { GetListWidthDrawQueryType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 
 @Injectable()
 export class ManagersService {
@@ -54,6 +55,9 @@ export class ManagersService {
 
     if ((await this.categoriesRepository.findUnique([categoryId])).length < 1) throw InvalidCategoryIdException([categoryId])
     return await this.categoriesRepository.deleteCategory(userId, categoryId)
+  }
+  async getListWithDraw(query: GetListWidthDrawQueryType) {
+    return await this.managerRepository.getListWithDraw(query)
   }
 
 }
