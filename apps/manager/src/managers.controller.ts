@@ -63,7 +63,10 @@ export class ManagersController {
   @MessagePattern({ cmd: "update-withdraw" })
   @ZodSerializerDto(MessageResDTO)
   async changeStatusWithDraw(@Payload() { userId, body }: { userId: number, body: UpdateWithDrawalBodyType }) {
-    return await this.managersService.changeStatusWithDraw(body, userId)
+    await this.managersService.changeStatusWithDraw(body, userId)
+    return {
+      message: "Change status withdraw successfully"
+    }
 
   }
 }

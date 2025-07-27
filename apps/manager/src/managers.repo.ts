@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, WithdrawalStatus } from "@prisma/client";
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 import { UpdateWithDrawalBodyType } from "libs/common/src/request-response-type/with-draw/with-draw.model";
@@ -106,15 +106,37 @@ export class ManagerRepository {
     }
     async changeStatusWidthDraw(body: UpdateWithDrawalBodyType, userId: number) {
         const { id, ...rest } = body
-        return this.prismaService.withdrawalRequest.update({
+
+        const withdrawalRequest = await this.prismaService.withdrawalRequest.update({
             where: {
                 id
             }, data: {
                 ...rest,
                 processedAt: new Date(),
                 providerId: userId
-            }
+            },
         })
+
+        if (body.status === WithdrawalStatus.COMPLETED) {
+            const userId = await this.prismaService.serviceProvider.findUnique({
+                where: {
+                    id: withdrawalRequest.providerId
+                },
+                select: {
+                    userId: true
+                }
+            })
+            return await this.prismaService.wallet.update({
+                where: {
+                    userId: userId!.userId
+                },
+                data: {
+                    balance: {
+                        decrement: withdrawalRequest.amount
+                    }
+                }
+            })
+        }
     }
 
 
