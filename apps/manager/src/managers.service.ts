@@ -59,5 +59,7 @@ export class ManagersService {
   async getListWithDraw(query: GetListWidthDrawQueryType) {
     return await this.managerRepository.getListWithDraw(query)
   }
-
+  async getWithDrawDetail(id: number) {
+    return await this.managerRepository.getWithDrawDetail(id)
+  }
 }

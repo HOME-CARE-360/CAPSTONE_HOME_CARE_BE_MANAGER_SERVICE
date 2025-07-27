@@ -50,5 +50,59 @@ export class ManagerRepository {
 
         })
     }
+    async getWithDrawDetail(id: number) {
+        const data = await this.prismaService.withdrawalRequest.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                amount: true,
+                status: true,
+                createdAt: true,
+                processedAt: true,
+                note: true,
+
+                ServiceProvider: {
+                    select: {
+                        address: true,
+                        description: true, companyType: true,
+                        logo: true,
+                        industry: true,
+                        licenseNo: true,
+                        taxId: true,
+
+                        user: {
+                            select: {
+                                name: true,
+                                phone: true,
+                                email: true,
+                                Wallet: {
+                                    select: {
+                                        bankAccount: true,
+                                        bankName: true,
+                                        accountHolder: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        if (!data) return null;
+
+
+        const { ServiceProvider, ...rest } = data;
+        const { user, ...providerFields } = ServiceProvider;
+
+        return {
+            ...rest,
+            ServiceProvider: {
+                ...providerFields,
+                ...user
+            }
+        };
+
+    }
+
 
 }
