@@ -7,8 +7,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
-import { GetListWidthDrawQueryType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
-import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
+import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -59,6 +58,12 @@ export class ManagersController {
   @ZodSerializerDto(MessageResDTO)
   async getWithDrawDetail(@Payload() { id }: { id: number }) {
     return await this.managersService.getWithDrawDetail(id)
+
+  }
+  @MessagePattern({ cmd: "update-withdraw" })
+  @ZodSerializerDto(MessageResDTO)
+  async changeStatusWithDraw(@Payload() { userId, body }: { userId: number, body: UpdateWithDrawalBodyType }) {
+    return await this.managersService.changeStatusWithDraw(body, userId)
 
   }
 }

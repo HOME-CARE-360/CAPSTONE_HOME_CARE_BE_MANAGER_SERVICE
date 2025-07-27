@@ -1,4 +1,5 @@
 import { createZodDto } from "nestjs-zod";
-import { GetListWidthDrawQuerySchema } from "./with-draw.model";
+import { GetListWidthDrawQuerySchema, UpdateWithDrawalBodySchema } from "./with-draw.model";
 
 export class GetListWidthDrawQueryDTO extends createZodDto(GetListWidthDrawQuerySchema) { }
+export class UpdateWithDrawalBodyDTO extends createZodDto(UpdateWithDrawalBodySchema) { }

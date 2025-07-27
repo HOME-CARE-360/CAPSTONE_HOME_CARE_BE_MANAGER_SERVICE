@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
+import { UpdateWithDrawalBodyType } from "libs/common/src/request-response-type/with-draw/with-draw.model";
 
 import { PrismaService } from "libs/common/src/services/prisma.service";
 
@@ -102,6 +103,18 @@ export class ManagerRepository {
             }
         };
 
+    }
+    async changeStatusWidthDraw(body: UpdateWithDrawalBodyType, userId: number) {
+        const { id, ...rest } = body
+        return this.prismaService.withdrawalRequest.update({
+            where: {
+                id
+            }, data: {
+                ...rest,
+                processedAt: new Date(),
+                providerId: userId
+            }
+        })
     }
 
 

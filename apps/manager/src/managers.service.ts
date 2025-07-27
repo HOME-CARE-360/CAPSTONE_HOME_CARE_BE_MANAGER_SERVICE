@@ -8,7 +8,7 @@ import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-p
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-category.repo';
 import { CategoryAlreadyExistException, InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
-import { GetListWidthDrawQueryType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
+import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 
 @Injectable()
 export class ManagersService {
@@ -61,5 +61,8 @@ export class ManagersService {
   }
   async getWithDrawDetail(id: number) {
     return await this.managerRepository.getWithDrawDetail(id)
+  }
+  async changeStatusWithDraw(body: UpdateWithDrawalBodyType, userId: number) {
+    return await this.managerRepository.changeStatusWidthDraw(body, userId)
   }
 }
