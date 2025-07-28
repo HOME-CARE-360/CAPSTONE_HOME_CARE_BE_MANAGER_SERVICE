@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
-import { SameVerificationStatusException } from './manager.error';
+import { NoteRequiredForResolvedStatusException, SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
@@ -9,6 +9,8 @@ import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/
 import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-category.repo';
 import { CategoryAlreadyExistException, InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
+import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
+import { ReportStatus } from '@prisma/client';
 
 @Injectable()
 export class ManagersService {
@@ -64,5 +66,14 @@ export class ManagersService {
   }
   async changeStatusWithDraw(body: UpdateWithDrawalBodyType, userId: number) {
     return await this.managerRepository.changeStatusWidthDraw(body, userId)
+  }
+  async getListReport(query: GetListReportQueryType) {
+    return await this.managerRepository.getListReport(query)
+  }
+  async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
+    if (body.status === ReportStatus.RESOLVED && !body.note) {
+      throw NoteRequiredForResolvedStatusException
+    }
+    return await this.managerRepository.updateReport(body, reportId, userId)
   }
 }

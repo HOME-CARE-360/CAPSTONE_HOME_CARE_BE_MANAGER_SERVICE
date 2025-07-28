@@ -8,6 +8,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
+import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -67,6 +68,18 @@ export class ManagersController {
     return {
       message: "Change status withdraw successfully"
     }
+
+  }
+  @MessagePattern({ cmd: "get-list-report" })
+  @ZodSerializerDto(MessageResDTO)
+  async getListReport(@Payload() query: GetListReportQueryType) {
+    return await this.managersService.getListReport(query)
+
+  }
+  @MessagePattern({ cmd: "update-report" })
+  @ZodSerializerDto(MessageResDTO)
+  async updateReport(@Payload() { data, reportId, userId }: { data: UpdateProviderReportType, userId: number, reportId: number }) {
+    return await this.managersService.updateReport(data, reportId, userId)
 
   }
 }

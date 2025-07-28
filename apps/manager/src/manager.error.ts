@@ -17,6 +17,11 @@ export const SameVerificationStatusException = new RpcException(
         { message: 'Error.SameVerificationStatus', path: ['verificationStatus'] },
     ])
 );
+export const NoteRequiredForResolvedStatusException = new RpcException(
+    new BadRequestException([
+        { message: 'Error.NoteRequiredForResolvedStatus', path: ['note'] },
+    ])
+);
 
 export const InvalidCompanyTypeException = new RpcException(
     new BadRequestException([

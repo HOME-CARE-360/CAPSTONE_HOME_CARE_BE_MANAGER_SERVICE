@@ -16,7 +16,8 @@ export const GetListWidthDrawQuerySchema = z.object({
 export const UpdateWithDrawalBodySchema = WithdrawalRequestSchema.pick({
     note: true,
     id: true,
-    status: true
+    status: true,
+    
 })
 export type UpdateWithDrawalBodyType = z.infer<typeof UpdateWithDrawalBodySchema>
 export type GetListWidthDrawQueryType = z.infer<typeof GetListWidthDrawQuerySchema>

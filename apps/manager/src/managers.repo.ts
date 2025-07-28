@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, WithdrawalStatus } from "@prisma/client";
 import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
+import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 import { UpdateWithDrawalBodyType } from "libs/common/src/request-response-type/with-draw/with-draw.model";
 
@@ -43,7 +44,7 @@ export class ManagerRepository {
         return await this.prismaService.withdrawalRequest.findMany({
             where,
             orderBy: {
-                [query.sortBy]: query.sortBy
+                [query.sortBy]: query.orderBy
             }
             ,
             skip: (query.page - 1) * query.limit,
@@ -139,5 +140,33 @@ export class ManagerRepository {
         }
     }
 
+    async getListReport(query: GetListReportQueryType) {
+        const where: Prisma.ProviderReportWhereInput = {}
+        if (query.status) {
+            where.status = query.status
+        }
+        return await this.prismaService.providerReport.findMany({
+            where,
+            skip: (query.page - 1) * query.limit,
+            orderBy: {
 
+                [query.sortBy]: query.orderBy
+            },
+            take: query.limit,
+        })
+    }
+    async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
+
+        return await this.prismaService.providerReport.update({
+            where: {
+                id: reportId
+            },
+            data: {
+                ...body,
+                reviewedAt: new Date(),
+                reviewedById: userId
+            }
+        }
+        )
+    }
 }
