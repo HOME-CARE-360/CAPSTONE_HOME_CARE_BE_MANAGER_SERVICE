@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
+import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
 import { NoteRequiredForResolvedStatusException, SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
@@ -75,5 +75,8 @@ export class ManagersService {
       throw NoteRequiredForResolvedStatusException
     }
     return await this.managerRepository.updateReport(body, reportId, userId)
+  }
+  async getListProvider(query: GetListProviderQueryType) {
+    return await this.managerRepository.getListProvider(query)
   }
 }

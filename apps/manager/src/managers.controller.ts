@@ -6,7 +6,7 @@ import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/request-response-type/category/category.model';
-import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
+import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
 
@@ -80,6 +80,12 @@ export class ManagersController {
   @ZodSerializerDto(MessageResDTO)
   async updateReport(@Payload() { data, reportId, userId }: { data: UpdateProviderReportType, userId: number, reportId: number }) {
     return await this.managersService.updateReport(data, reportId, userId)
+
+  }
+  @MessagePattern({ cmd: "get-list-provider" })
+  @ZodSerializerDto(MessageResDTO)
+  async getListProvider(@Payload() { query }: { query: GetListProviderQueryType }) {
+    return await this.managersService.getListProvider(query)
 
   }
 }

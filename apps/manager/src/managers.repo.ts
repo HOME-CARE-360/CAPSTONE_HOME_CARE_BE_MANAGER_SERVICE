@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, WithdrawalStatus } from "@prisma/client";
-import { UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
+import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 import { UpdateWithDrawalBodyType } from "libs/common/src/request-response-type/with-draw/with-draw.model";
@@ -168,5 +168,54 @@ export class ManagerRepository {
             }
         }
         )
+    }
+    async getListProvider(query: GetListProviderQueryType) {
+        const where: Prisma.ServiceProviderWhereInput = {};
+
+        if (query.licenseNo) {
+            where.licenseNo = query.licenseNo;
+        }
+
+        if (query.companyType) {
+            where.companyType = query.companyType;
+        }
+
+        if (query.verificationStatus) {
+            where.verificationStatus = query.verificationStatus;
+        }
+
+        if (query.taxId) {
+            where.taxId = {
+                contains: query.taxId,
+                mode: 'insensitive',
+            };
+        }
+
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+
+        const [data, total] = await this.prismaService.$transaction([
+            this.prismaService.serviceProvider.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }),
+            this.prismaService.serviceProvider.count({
+                where,
+            }),
+        ]);
+
+        return {
+            data,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 }
