@@ -141,20 +141,37 @@ export class ManagerRepository {
     }
 
     async getListReport(query: GetListReportQueryType) {
-        const where: Prisma.ProviderReportWhereInput = {}
-        if (query.status) {
-            where.status = query.status
-        }
-        return await this.prismaService.providerReport.findMany({
-            where,
-            skip: (query.page - 1) * query.limit,
-            orderBy: {
+        const { page, limit, sortBy, orderBy, status } = query;
 
-                [query.sortBy]: query.orderBy
-            },
-            take: query.limit,
-        })
+        const where: Prisma.ProviderReportWhereInput = {};
+
+        if (status) {
+            where.status = Array.isArray(status)
+                ? { in: status }
+                : status;
+        }
+
+        const [total, data] = await Promise.all([
+            this.prismaService.providerReport.count({ where }),
+            this.prismaService.providerReport.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: {
+                    [sortBy]: orderBy,
+                },
+            }),
+        ]);
+
+        return {
+            data,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        };
     }
+
     async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
 
         return await this.prismaService.providerReport.update({
