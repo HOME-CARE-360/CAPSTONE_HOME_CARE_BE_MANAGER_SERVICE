@@ -214,6 +214,15 @@ export class ManagerRepository {
         const [data, total] = await this.prismaService.$transaction([
             this.prismaService.serviceProvider.findMany({
                 where,
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            phone: true
+                        }
+                    }
+                },
                 skip: (page - 1) * limit,
                 take: limit,
                 orderBy: {
