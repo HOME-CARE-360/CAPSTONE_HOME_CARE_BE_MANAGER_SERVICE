@@ -59,6 +59,9 @@ export class ManagersController {
   @MessagePattern({ cmd: "get-list-service" })
   @ZodSerializerDto(MessageResDTO)
   async getListService(@Payload() query: GetServicesForManagerQueryType) {
+    console.log("vao r");
+    console.log(query);
+
     return await this.managersService.getListService(query)
 
   }

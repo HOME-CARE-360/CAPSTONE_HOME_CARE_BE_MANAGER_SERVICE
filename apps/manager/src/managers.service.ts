@@ -81,6 +81,6 @@ export class ManagersService {
     return await this.managerRepository.getListProvider(query)
   }
   async getListService(query: GetServicesForManagerQueryType) {
-    await this.managerRepository.list({ ...query })
+    return await this.managerRepository.list({ ...query })
   }
 }
