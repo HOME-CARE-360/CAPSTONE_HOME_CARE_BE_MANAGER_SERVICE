@@ -49,6 +49,8 @@ export class SharedCategoryRepository {
 
     }
     async createCategory(body: CreateCategoryBodyType, userId: number) {
+        console.log(body, userId);
+
         return await this.prismaService.category.create({
             data: {
                 ...body,
