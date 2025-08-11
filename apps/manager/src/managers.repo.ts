@@ -42,6 +42,11 @@ export class ManagerRepository {
                 name: query.providerName
             }
         }
+        if (query.status) {
+            where.status = {
+                in: query.status
+            }
+        }
         return await this.prismaService.withdrawalRequest.findMany({
             where,
             orderBy: {
