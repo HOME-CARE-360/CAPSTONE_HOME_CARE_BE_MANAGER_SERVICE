@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, WithdrawalStatus } from "@prisma/client";
+import { Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
+import { OrderByType, SortBy, SortByType } from "libs/common/src/constants/others.constant";
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
@@ -243,5 +244,135 @@ export class ManagerRepository {
                 totalPages: Math.ceil(total / limit),
             },
         };
+    }
+    async list({
+        limit,
+        page,
+        name,
+        providerIds,
+        categories,
+        minPrice,
+        maxPrice,
+        orderBy,
+        sortBy,
+        status
+    }: {
+        limit: number
+        page: number
+        name?: string
+        providerIds?: number[]
+        categories?: number[]
+        minPrice?: number
+        maxPrice?: number
+        orderBy: OrderByType
+        sortBy: SortByType
+        status: ServiceStatus[]
+    }) {
+
+
+        const skip = (page - 1) * limit
+        const take = limit
+        const where: Prisma.ServiceWhereInput = {
+            publishedAt: {
+                lte: new Date(),
+                not: null,
+            },
+            deletedAt: null,
+        }
+
+        if (name) {
+            where.name = {
+                contains: name,
+                mode: 'insensitive',
+            }
+        }
+        if (status) {
+            where.status = {
+                in: status
+            }
+        }
+        if (providerIds && providerIds.length > 0) {
+            where.providerId = {
+                in: providerIds,
+            }
+        }
+        if (categories && categories.length > 0) {
+            where.categoryId = {
+                in: categories,
+
+
+            }
+        }
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            where.virtualPrice = {
+                gte: minPrice,
+                lte: maxPrice,
+            }
+        }
+
+        let caculatedOrderBy: Prisma.ServiceOrderByWithRelationInput | Prisma.ServiceOrderByWithRelationInput[] = {
+            createdAt: orderBy,
+
+        }
+        if (sortBy === SortBy.Price) {
+            caculatedOrderBy = {
+                basePrice: orderBy,
+            }
+        } else if (sortBy === SortBy.Discount) {
+            caculatedOrderBy = {
+                basePrice: orderBy
+            }
+        }
+        const [totalItems, data] = await Promise.all([
+            this.prismaService.service.count({
+                where,
+            }),
+            this.prismaService.service.findMany({
+                where,
+
+                include: {
+                    // translations: {
+                    //     where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { languageId, deletedAt: null },
+                    // },
+                    provider: {
+                        select: {
+                            user: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    },
+                    Category: {
+
+                        select: {
+                            logo: true,
+                            name: true
+                        }
+                    }
+                },
+                omit: {
+                    deletedAt: true,
+                    deletedById: true,
+                    updatedAt: true,
+                    updatedById: true,
+                    createdAt: true,
+                    createdById: true,
+                    publishedAt: true
+                },
+
+                orderBy: caculatedOrderBy,
+                skip,
+                take,
+            }),
+        ])
+        const services = data.map(({ provider, ...rest }) => ({ ...rest, provider: provider.user.name }))
+        return {
+            data: services,
+            totalItems,
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalItems / limit),
+        }
     }
 }

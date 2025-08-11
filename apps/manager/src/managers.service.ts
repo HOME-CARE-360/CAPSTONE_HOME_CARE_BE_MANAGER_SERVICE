@@ -11,6 +11,7 @@ import { CategoryAlreadyExistException, InvalidCategoryIdException } from 'libs/
 import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
 import { ReportStatus } from '@prisma/client';
+import { GetServicesForManagerQueryType } from 'libs/common/src/request-response-type/service/services.model';
 
 @Injectable()
 export class ManagersService {
@@ -78,5 +79,8 @@ export class ManagersService {
   }
   async getListProvider(query: GetListProviderQueryType) {
     return await this.managerRepository.getListProvider(query)
+  }
+  async getListService(query: GetServicesForManagerQueryType) {
+    await this.managerRepository.list({ ...query })
   }
 }

@@ -9,6 +9,7 @@ import { CreateCategoryBodyType, UpdateCategoryBodyType } from 'libs/common/src/
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common/src/request-response-type/with-draw/with-draw.model';
 import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
+import { GetServicesForManagerQueryType } from 'libs/common/src/request-response-type/service/services.model';
 
 @ApiBearerAuth()
 @Controller('managers')
@@ -53,6 +54,12 @@ export class ManagersController {
   @ZodSerializerDto(MessageResDTO)
   async getListWithDraw(@Payload() query: GetListWidthDrawQueryType) {
     return await this.managersService.getListWithDraw(query)
+
+  }
+  @MessagePattern({ cmd: "get-list-service" })
+  @ZodSerializerDto(MessageResDTO)
+  async getListService(@Payload() query: GetServicesForManagerQueryType) {
+    return await this.managersService.getListService(query)
 
   }
   @MessagePattern({ cmd: "get-withdraw-detail" })
