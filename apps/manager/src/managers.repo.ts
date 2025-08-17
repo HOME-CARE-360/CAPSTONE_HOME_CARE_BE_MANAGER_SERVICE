@@ -35,28 +35,72 @@ export class ManagerRepository {
         })
     }
     async getListWithDraw(query: GetListWidthDrawQueryDTO) {
-        const where: Prisma.WithdrawalRequestWhereInput = {}
+        const page = Math.max(1, Number(query.page) || 1);
+        const limit = Math.min(Math.max(Number(query.limit) || 20, 1), 100);
+        const skip = (page - 1) * limit;
 
-        if (query.providerName) {
-            where.ServiceProvider!.user = {
-                name: query.providerName
-            }
-        }
-        if (query.status) {
-            where.status = {
-                in: query.status
-            }
-        }
-        return await this.prismaService.withdrawalRequest.findMany({
-            where,
-            orderBy: {
-                [query.sortBy]: query.orderBy
-            }
-            ,
-            skip: (query.page - 1) * query.limit,
-            take: query.limit
+        const keyword = (query.username || "").trim();
+        const statuses = Array.isArray(query.status)
+            ? query.status
+            : query.status
+                ? [query.status]
+                : [];
 
-        })
+        const where: Prisma.WithdrawalRequestWhereInput = {
+            ...(keyword && {
+                OR: [
+                    { User: { name: { contains: keyword, mode: "insensitive" } } },
+                    { User: { email: { contains: keyword, mode: "insensitive" } } },
+                ],
+            }),
+            ...(statuses.length && { status: { in: statuses } }),
+        };
+
+        const dir: "asc" | "desc" = query.orderBy === "asc" ? "asc" : "desc";
+        const sortBy = query.sortBy || "createdAt";
+
+        let orderBy:
+            | Prisma.WithdrawalRequestOrderByWithRelationInput
+            | Prisma.WithdrawalRequestOrderByWithRelationInput[] = { createdAt: dir };
+
+        switch (sortBy) {
+            case "amount":
+                orderBy = { amount: dir };
+                break;
+
+                break;
+            case "createdAt":
+                orderBy = { createdAt: dir };
+                break;
+            case "processedAt":
+                orderBy = { processedAt: dir };
+                break;
+            default:
+                orderBy = { createdAt: dir };
+        }
+
+        const [items, total] = await Promise.all([
+            this.prismaService.withdrawalRequest.findMany({
+                where,
+                orderBy,
+                skip,
+                take: limit,
+                include: {
+                    User: { select: { id: true, name: true, email: true } },
+                },
+            }),
+            this.prismaService.withdrawalRequest.count({ where }),
+        ]);
+
+        return {
+            data: items,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit),
+            },
+        };
     }
     async getWithDrawDetail(id: number) {
         const data = await this.prismaService.withdrawalRequest.findUnique({
@@ -69,27 +113,19 @@ export class ManagerRepository {
                 processedAt: true,
                 note: true,
 
-                ServiceProvider: {
+                User: {
                     select: {
-                        address: true,
-                        description: true, companyType: true,
-                        logo: true,
-                        industry: true,
-                        licenseNo: true,
-                        taxId: true,
-
-                        user: {
+                        name: true,
+                        phone: true,
+                        email: true,
+                        avatar: true,
+                        Wallet: {
                             select: {
-                                name: true,
-                                phone: true,
-                                email: true,
-                                Wallet: {
-                                    select: {
-                                        bankAccount: true,
-                                        bankName: true,
-                                        accountHolder: true
-                                    }
-                                }
+                                bankName: true,
+                                bankAccount: true,
+                                balance: true,
+                                accountHolder: true
+
                             }
                         }
                     }
@@ -99,16 +135,7 @@ export class ManagerRepository {
         if (!data) return null;
 
 
-        const { ServiceProvider, ...rest } = data;
-        const { user, ...providerFields } = ServiceProvider;
-
-        return {
-            ...rest,
-            ServiceProvider: {
-                ...providerFields,
-                ...user
-            }
-        };
+        return data
 
     }
     async changeStatusWidthDraw(body: UpdateWithDrawalBodyType, userId: number) {
@@ -120,22 +147,14 @@ export class ManagerRepository {
             }, data: {
                 ...rest,
                 processedAt: new Date(),
-                providerId: userId
+                processedById: userId
             },
         })
 
         if (body.status === WithdrawalStatus.COMPLETED) {
-            const userId = await this.prismaService.serviceProvider.findUnique({
-                where: {
-                    id: withdrawalRequest.providerId
-                },
-                select: {
-                    userId: true
-                }
-            })
             return await this.prismaService.wallet.update({
                 where: {
-                    userId: userId!.userId
+                    userId: withdrawalRequest.userId
                 },
                 data: {
                     balance: {

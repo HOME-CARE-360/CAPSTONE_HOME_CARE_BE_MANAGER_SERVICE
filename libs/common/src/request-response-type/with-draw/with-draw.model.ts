@@ -5,7 +5,7 @@ import { WithdrawalRequestSchema } from "../../models/withdrawal.model";
 export const GetListWidthDrawQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().default(10),
-    providerName: z.string().optional(),
+    username: z.string().optional(),
     status: z
         .preprocess((value) =>
             typeof value === 'string' ? [value] : value
