@@ -68,7 +68,7 @@ export class ManagerRepository {
                 orderBy = { amount: dir };
                 break;
 
-                break;
+
             case "createdAt":
                 orderBy = { createdAt: dir };
                 break;
@@ -86,14 +86,20 @@ export class ManagerRepository {
                 skip,
                 take: limit,
                 include: {
-                    User: { select: { id: true, name: true, email: true } },
+                    User_WithdrawalRequest_userIdToUser:
+                        { select: { id: true, name: true, email: true } },
+
+
                 },
             }),
             this.prismaService.withdrawalRequest.count({ where }),
         ]);
-
+        const raws = items.map((item) => {
+            const { User_WithdrawalRequest_userIdToUser, ...rest } = item
+            return { ...rest, User: { ...User_WithdrawalRequest_userIdToUser } }
+        })
         return {
-            data: items,
+            data: raws,
             pagination: {
                 total,
                 page,
@@ -180,6 +186,33 @@ export class ManagerRepository {
             this.prismaService.providerReport.count({ where }),
             this.prismaService.providerReport.findMany({
                 where,
+                include: {
+                    CustomerProfile: {
+                        include: {
+                            user: {
+                                select: {
+                                    name: true,
+                                    phone: true,
+                                    email: true,
+                                    avatar: true,
+
+                                }
+                            }
+                        }
+                    },
+                    ServiceProvider: {
+                        include: {
+                            user: {
+                                select: {
+                                    name: true,
+                                    phone: true,
+                                    email: true,
+                                    avatar: true,
+                                }
+                            }
+                        }
+                    }
+                },
                 skip: (page - 1) * limit,
                 take: limit,
                 orderBy: {
