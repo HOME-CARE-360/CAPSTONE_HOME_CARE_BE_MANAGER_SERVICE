@@ -118,8 +118,7 @@ export class ManagerRepository {
                 createdAt: true,
                 processedAt: true,
                 note: true,
-
-                User: {
+                User_WithdrawalRequest_userIdToUser: {
                     select: {
                         name: true,
                         phone: true,
