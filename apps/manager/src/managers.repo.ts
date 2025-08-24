@@ -173,7 +173,7 @@ export class ManagerRepository {
     async getListReport(query: GetListReportQueryType) {
         const { page, limit, sortBy, orderBy, status } = query;
 
-        const where: Prisma.ProviderReportWhereInput = {};
+        const where: Prisma.BookingReportWhereInput = {};
 
         if (status) {
             where.status = Array.isArray(status)
@@ -182,8 +182,8 @@ export class ManagerRepository {
         }
 
         const [total, data] = await Promise.all([
-            this.prismaService.providerReport.count({ where }),
-            this.prismaService.providerReport.findMany({
+            this.prismaService.bookingReport.count({ where }),
+            this.prismaService.bookingReport.findMany({
                 where,
                 include: {
                     CustomerProfile: {
@@ -231,7 +231,7 @@ export class ManagerRepository {
 
     async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
 
-        return await this.prismaService.providerReport.update({
+        return await this.prismaService.bookingReport.update({
             where: {
                 id: reportId
             },
