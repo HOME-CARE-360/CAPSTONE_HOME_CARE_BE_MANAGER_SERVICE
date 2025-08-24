@@ -82,7 +82,7 @@ export class ManagersController {
   }
   @MessagePattern({ cmd: "get-list-report" })
   @ZodSerializerDto(MessageResDTO)
-  async getListReport(@Payload() query: GetListReportQueryType) {
+  async getListReport(@Payload() { query }: { query: GetListReportQueryType }) {
     return await this.managersService.getListReport(query)
 
   }
