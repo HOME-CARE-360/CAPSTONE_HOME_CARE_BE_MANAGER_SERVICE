@@ -228,6 +228,42 @@ export class ManagerRepository {
             totalPages: Math.ceil(total / limit),
         };
     }
+    async getReportDetail(reportId: number) {
+        const data = await this.prismaService.bookingReport.findUnique({
+            where: {
+                id: reportId
+            },
+            include: {
+                CustomerProfile: {
+                    include: {
+                        user: {
+                            select: {
+                                name: true,
+                                phone: true,
+                                email: true,
+                                avatar: true,
+
+                            }
+                        }
+                    }
+                },
+                ServiceProvider: {
+                    include: {
+                        user: {
+                            select: {
+                                name: true,
+                                phone: true,
+                                email: true,
+                                avatar: true,
+                            }
+                        }
+                    }
+                }
+            },
+        })
+
+        return data
+    }
 
     async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
 

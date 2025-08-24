@@ -83,4 +83,7 @@ export class ManagersService {
   async getListService(query: GetServicesForManagerQueryType) {
     return await this.managerRepository.list({ ...query })
   }
+  async getReportDetail(reportId: number) {
+    return await this.managerRepository.getReportDetail(reportId)
+  }
 }

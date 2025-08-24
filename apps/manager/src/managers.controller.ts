@@ -98,4 +98,10 @@ export class ManagersController {
     return await this.managersService.getListProvider(query)
 
   }
+  @MessagePattern({ cmd: "get-report-detail" })
+  @ZodSerializerDto(MessageResDTO)
+  async getReportDetail(@Payload() { reportId }: { reportId: number }) {
+    return await this.managersService.getReportDetail(reportId)
+
+  }
 }
