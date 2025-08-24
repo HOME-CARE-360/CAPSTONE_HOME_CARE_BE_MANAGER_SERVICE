@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
+import { PaymentTransactionStatus, Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
 import { OrderByType, SortBy, SortByType } from "libs/common/src/constants/others.constant";
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
@@ -146,17 +146,23 @@ export class ManagerRepository {
     async changeStatusWidthDraw(body: UpdateWithDrawalBodyType, userId: number) {
         const { id, ...rest } = body
 
-        const withdrawalRequest = await this.prismaService.withdrawalRequest.update({
-            where: {
-                id
-            }, data: {
-                ...rest,
-                processedAt: new Date(),
-                processedById: userId
-            },
-        })
+
 
         if (body.status === WithdrawalStatus.COMPLETED) {
+            const withdrawalRequest = await this.prismaService.withdrawalRequest.update({
+                where: {
+                    id
+                }, data: {
+                    ...rest,
+                    processedAt: new Date(),
+                    processedById: userId,
+                    PaymentTransaction: {
+                        update: {
+                            status: PaymentTransactionStatus.SUCCESS
+                        }
+                    }
+                },
+            })
             return await this.prismaService.wallet.update({
                 where: {
                     userId: withdrawalRequest.userId
@@ -167,6 +173,22 @@ export class ManagerRepository {
                     }
                 }
             })
+        } else {
+            const withdrawalRequest = await this.prismaService.withdrawalRequest.update({
+                where: {
+                    id
+                }, data: {
+                    ...rest,
+                    processedAt: new Date(),
+                    processedById: userId,
+                    PaymentTransaction: {
+                        update: {
+                            status: PaymentTransactionStatus.SUCCESS
+                        }
+                    }
+                },
+            })
+            return withdrawalRequest
         }
     }
 
