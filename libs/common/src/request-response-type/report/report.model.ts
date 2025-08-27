@@ -9,7 +9,6 @@ import { OrderBy, SortByWithDraw } from '../../constants/others.constant';
 export const UpdateProviderReportSchema = z.object({
     id: z.number().int(),
     status: z.enum([ReportStatus.PENDING, ReportStatus.REJECTED, ReportStatus.RESOLVED, ReportStatus.UNDER_REVIEW]).optional(),
-    reviewedAt: z.date().optional(),
     reviewedById: z.number().int().optional(),
     note: z.string().max(1000).optional(),
 });
