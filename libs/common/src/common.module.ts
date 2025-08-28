@@ -17,6 +17,7 @@ import { SharedRoleRepository } from './repositories/shared-role.repo';
 import { S3Service } from './services/S3.service';
 import { ShareStaffRepository } from './repositories/shared-staff.repo';
 import { SharedCategoryRepository } from './repositories/shared-category.repo';
+import { SharedBookingReportRepository } from './repositories/shared-booking-report.repo';
 const sharedServices = [
   PrismaService,
   HashingService,
@@ -32,7 +33,7 @@ const sharedServices = [
   ShareStaffRepository,
   SharedCategoryRepository,
   SharedUserRepository,
-
+  SharedBookingReportRepository,
 
 ]
 

@@ -298,18 +298,44 @@ export class ManagerRepository {
     }
 
     async updateReport(body: UpdateProviderReportType, userId: number) {
-        const { id, ...rest } = body
-        return await this.prismaService.bookingReport.update({
-            where: {
-                id
-            },
-            data: {
-                ...rest,
-                reviewedAt: new Date(),
-                reviewedById: userId
-            }
-        }
-        )
+        const { id, ...rest } = body;
+        return this.prismaService.$transaction(async (tx) => {
+            await tx.wallet.update({
+                where: { userId: body.reporterId },
+                data: { balance: { increment: body.amount } },
+                select: { id: true },
+            });
+
+            const report = await tx.bookingReport.update({
+                where: { id },
+                data: {
+                    ...rest,
+                    reviewedAt: new Date(),
+                    reviewedById: userId,
+                    PaymentTransaction: {
+                        create: {
+                            gateway: 'INTERNAL_WALLET',
+                            status: PaymentTransactionStatus.REFUNDED,
+                            userId,
+                            transactionDate: new Date(),
+                            amountOut: body.amount,
+                            amountIn: body.amount,
+                            referenceNumber: 'REFUND_RB',
+                            transactionContent: 'Hoàn tiền báo cáo dịch vụ',
+                        },
+                    },
+                },
+                select: {
+                    id: true,
+                    status: true,
+                    reviewedAt: true,
+                    reviewedById: true,
+
+                },
+            });
+
+            return report;
+        });
     }
     async getListProvider(query: GetListProviderQueryType) {
         const where: Prisma.ServiceProviderWhereInput = {};

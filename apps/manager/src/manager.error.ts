@@ -22,6 +22,11 @@ export const NoteRequiredForResolvedStatusException = new RpcException(
         { message: 'Error.NoteRequiredForResolvedStatus', path: ['note'] },
     ])
 );
+export const ReportHasAlreadyBeenResolvedException = new RpcException(
+    new BadRequestException([
+        { message: 'Report has already been resolved', path: ['reportId'] },
+    ])
+);
 
 export const InvalidCompanyTypeException = new RpcException(
     new BadRequestException([
@@ -34,3 +39,9 @@ export const UserAlreadyLinkedToProviderException = new RpcException(
         { message: 'Error.UserAlreadyLinkedToProvider', path: ['userId'] },
     ])
 );
+export const AmountAndReporterIdAreRequiredException = new RpcException(
+    new UnprocessableEntityException([
+        { message: 'Amount and reporterId are required when status = RESOLVED', path: ['status'] },
+    ])
+);
+

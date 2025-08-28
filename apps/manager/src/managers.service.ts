@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
-import { NoteRequiredForResolvedStatusException, SameVerificationStatusException } from './manager.error';
+import { AmountAndReporterIdAreRequiredException, NoteRequiredForResolvedStatusException, ReportHasAlreadyBeenResolvedException, SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
@@ -12,6 +12,7 @@ import { GetListWidthDrawQueryType, UpdateWithDrawalBodyType } from 'libs/common
 import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/src/request-response-type/report/report.model';
 import { ReportStatus } from '@prisma/client';
 import { GetServicesForManagerQueryType } from 'libs/common/src/request-response-type/service/services.model';
+import { SharedBookingReportRepository } from 'libs/common/src/repositories/shared-booking-report.repo';
 
 @Injectable()
 export class ManagersService {
@@ -19,7 +20,8 @@ export class ManagersService {
 
     private readonly sharedProviderRepository: SharedProviderRepository,
     private readonly managerRepository: ManagerRepository,
-    private readonly categoriesRepository: SharedCategoryRepository
+    private readonly categoriesRepository: SharedCategoryRepository,
+    private readonly bookingReportRepository: SharedBookingReportRepository
   ) { }
   async updateProviderStatus(body: UpdateStatusProviderBodyType, userId: number) {
     const provider = await this.sharedProviderRepository.findUnique({ id: body.id })
@@ -72,9 +74,17 @@ export class ManagersService {
     return await this.managerRepository.getListReport(query)
   }
   async updateReport(body: UpdateProviderReportType, userId: number) {
+    const br = await this.bookingReportRepository.findUnique(body.id)
     if (body.status === ReportStatus.RESOLVED && !body.note) {
       throw NoteRequiredForResolvedStatusException
     }
+    if (body.status === ReportStatus.RESOLVED && br?.status === ReportStatus.RESOLVED) {
+      throw ReportHasAlreadyBeenResolvedException
+    }
+    if (body.status === ReportStatus.RESOLVED && (!body.amount || !body.reporterId)) {
+      throw AmountAndReporterIdAreRequiredException
+    }
+
     return await this.managerRepository.updateReport(body, userId)
   }
   async getListProvider(query: GetListProviderQueryType) {

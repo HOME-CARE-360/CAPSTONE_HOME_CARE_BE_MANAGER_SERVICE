@@ -11,6 +11,8 @@ export const UpdateProviderReportSchema = z.object({
     status: z.enum([ReportStatus.PENDING, ReportStatus.REJECTED, ReportStatus.RESOLVED, ReportStatus.UNDER_REVIEW]).optional(),
     reviewedById: z.number().int().optional(),
     note: z.string().max(1000).optional(),
+    amount: z.number().optional(),
+    reporterId: z.number().optional(),
 });
 export const GetListReportQuerySchema = z.object({
     status: z.enum([ReportStatus.PENDING, ReportStatus.REJECTED, ReportStatus.RESOLVED, ReportStatus.UNDER_REVIEW]).optional(),
