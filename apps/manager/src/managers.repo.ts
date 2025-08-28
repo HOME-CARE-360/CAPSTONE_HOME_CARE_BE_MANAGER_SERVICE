@@ -257,6 +257,15 @@ export class ManagerRepository {
                 id: reportId
             },
             include: {
+                Booking: {
+                    include: {
+                        Proposal: {
+                            include: {
+                                ProposalItem: true
+                            }
+                        }
+                    }
+                },
                 CustomerProfile: {
                     include: {
                         user: {
