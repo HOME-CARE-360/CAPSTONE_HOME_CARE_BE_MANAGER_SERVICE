@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
-import { AmountAndReporterIdAreRequiredException, NoteRequiredForResolvedStatusException, ReportHasAlreadyBeenResolvedException, SameVerificationStatusException } from './manager.error';
+import { AmountAndReporterIdAreRequiredException, NoteRequiredForResolvedStatusException, ReporterWalletNotFoundException, ReportHasAlreadyBeenResolvedException, SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
@@ -13,12 +13,14 @@ import { GetListReportQueryType, UpdateProviderReportType } from 'libs/common/sr
 import { ReportStatus } from '@prisma/client';
 import { GetServicesForManagerQueryType } from 'libs/common/src/request-response-type/service/services.model';
 import { SharedBookingReportRepository } from 'libs/common/src/repositories/shared-booking-report.repo';
+import { SharedUserRepository } from 'libs/common/src/repositories/shared-user.repo';
 
 @Injectable()
 export class ManagersService {
   constructor(
 
     private readonly sharedProviderRepository: SharedProviderRepository,
+    private readonly sharedUserRepository: SharedUserRepository,
     private readonly managerRepository: ManagerRepository,
     private readonly categoriesRepository: SharedCategoryRepository,
     private readonly bookingReportRepository: SharedBookingReportRepository
@@ -74,7 +76,13 @@ export class ManagersService {
     return await this.managerRepository.getListReport(query)
   }
   async updateReport(body: UpdateProviderReportType, userId: number) {
-    const br = await this.bookingReportRepository.findUnique(body.id)
+    let br: any
+    let user: any
+    if (body.status !== ReportStatus.RESOLVED) {
+      br = await this.bookingReportRepository.findUnique(body.id)
+    } else {
+      [br, user] = await Promise.all([this.bookingReportRepository.findUnique(body.id), this.sharedUserRepository.findUnique({ id: body.reporterId as number })])
+    }
     if (body.status === ReportStatus.RESOLVED && !body.note) {
       throw NoteRequiredForResolvedStatusException
     }
@@ -84,6 +92,12 @@ export class ManagersService {
     if (body.status === ReportStatus.RESOLVED && (!body.amount || !body.reporterId)) {
       throw AmountAndReporterIdAreRequiredException
     }
+    if (!user || !user.Wallet) {
+      throw ReporterWalletNotFoundException
+    }
+
+
+
 
     return await this.managerRepository.updateReport(body, userId)
   }

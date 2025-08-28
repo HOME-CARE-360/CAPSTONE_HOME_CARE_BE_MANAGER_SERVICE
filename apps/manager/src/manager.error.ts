@@ -1,7 +1,8 @@
 import {
     UnprocessableEntityException,
     BadRequestException,
-    ConflictException, // (tuỳ chọn) dùng cho "already exists"
+    ConflictException,
+    NotFoundException, // (tuỳ chọn) dùng cho "already exists"
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 
@@ -48,3 +49,9 @@ export const AmountAndReporterIdAreRequiredException = new RpcException(
         { message: 'amount and reporterId are required when status is RESOLVED', path: ['status'] },
     ]),
 );
+export const ReporterWalletNotFoundException = new RpcException(
+    new NotFoundException([
+        { message: 'Reporter wallet not found', path: ['reporterId'] }
+    ])
+
+)

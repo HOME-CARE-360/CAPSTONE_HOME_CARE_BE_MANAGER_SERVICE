@@ -32,7 +32,8 @@ export class SharedUserRepository {
                         id: true,
                         name: true
                     }
-                }
+                },
+                Wallet: true
             }
         })
         return data

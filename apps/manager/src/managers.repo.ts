@@ -298,11 +298,11 @@ export class ManagerRepository {
     }
 
     async updateReport(body: UpdateProviderReportType, userId: number) {
-        const { id, ...rest } = body;
+        const { id, reporterId, amount, ...rest } = body;
         return this.prismaService.$transaction(async (tx) => {
             await tx.wallet.update({
-                where: { userId: body.reporterId },
-                data: { balance: { increment: body.amount } },
+                where: { userId: reporterId },
+                data: { balance: { increment: amount } },
                 select: { id: true },
             });
 
@@ -318,8 +318,8 @@ export class ManagerRepository {
                             status: PaymentTransactionStatus.REFUNDED,
                             userId,
                             transactionDate: new Date(),
-                            amountOut: body.amount,
-                            amountIn: body.amount,
+                            amountOut: amount,
+                            amountIn: amount,
                             referenceNumber: 'REFUND_RB',
                             transactionContent: 'Hoàn tiền báo cáo dịch vụ',
                         },
