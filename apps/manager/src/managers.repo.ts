@@ -157,6 +157,7 @@ export class ManagerRepository {
                     processedAt: new Date(),
                     processedById: userId,
                     PaymentTransaction: {
+
                         update: {
                             status: PaymentTransactionStatus.SUCCESS
                         }
@@ -287,14 +288,14 @@ export class ManagerRepository {
         return data
     }
 
-    async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
-
+    async updateReport(body: UpdateProviderReportType, userId: number) {
+        const { id, ...rest } = body
         return await this.prismaService.bookingReport.update({
             where: {
-                id: reportId
+                id
             },
             data: {
-                ...body,
+                ...rest,
                 reviewedAt: new Date(),
                 reviewedById: userId
             }

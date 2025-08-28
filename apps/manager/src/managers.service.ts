@@ -71,11 +71,11 @@ export class ManagersService {
   async getListReport(query: GetListReportQueryType) {
     return await this.managerRepository.getListReport(query)
   }
-  async updateReport(body: UpdateProviderReportType, reportId: number, userId: number) {
+  async updateReport(body: UpdateProviderReportType, userId: number) {
     if (body.status === ReportStatus.RESOLVED && !body.note) {
       throw NoteRequiredForResolvedStatusException
     }
-    return await this.managerRepository.updateReport(body, reportId, userId)
+    return await this.managerRepository.updateReport(body, userId)
   }
   async getListProvider(query: GetListProviderQueryType) {
     return await this.managerRepository.getListProvider(query)
