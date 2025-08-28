@@ -55,3 +55,9 @@ export const ReporterWalletNotFoundException = new RpcException(
     ])
 
 )
+export const ReportNotFoundException = new RpcException(
+    new NotFoundException([
+        { message: 'Report not found exception', path: ['reporterId'] }
+    ])
+
+)
