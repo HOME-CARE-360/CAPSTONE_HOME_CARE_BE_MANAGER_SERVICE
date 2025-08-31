@@ -309,6 +309,7 @@ export class ManagerRepository {
             const report = await tx.bookingReport.update({
                 where: { id },
                 data: {
+
                     ...rest,
                     reviewedAt: new Date(),
                     reviewedById: userId,

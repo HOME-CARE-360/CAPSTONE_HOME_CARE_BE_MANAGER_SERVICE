@@ -95,17 +95,12 @@ export class ManagersService {
     }
 
     if (body.status === ReportStatus.RESOLVED) {
-
-
       if (br.status === ReportStatus.RESOLVED) {
         throw ReportHasAlreadyBeenResolvedException;
       }
-
       if (body.amount == null || body.reporterId == null) {
         throw AmountAndReporterIdAreRequiredException;
       }
-
-
       if (!user || !user.Wallet) {
         throw ReporterWalletNotFoundException;
       }
