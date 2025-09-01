@@ -346,7 +346,7 @@ export class ManagerRepository {
             });
             if (body.paymentTransactionId) {
                 if (trx) {
-                    await Promise.all([
+                    return await Promise.all([
                         tx.transaction.update({
                             where: {
 
@@ -366,7 +366,7 @@ export class ManagerRepository {
                         })])
 
                 }
-                await tx.paymentTransaction.update({
+                return await tx.paymentTransaction.update({
                     where: {
                         id: body.paymentTransactionId
                     },
