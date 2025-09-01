@@ -259,7 +259,9 @@ export class ManagerRepository {
             },
             include: {
                 Booking: {
+
                     include: {
+                        transaction: true,
                         ServiceRequest: {
                             include: {
                                 PaymentTransaction: true
