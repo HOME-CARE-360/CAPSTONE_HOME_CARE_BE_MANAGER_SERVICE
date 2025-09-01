@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PaymentStatus, PaymentTransactionStatus, Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
+import { PaymentStatus, PaymentTransactionStatus, Prisma, ReportStatus, ServiceStatus, WithdrawalStatus } from "@prisma/client";
 import { OrderByType, SortBy, SortByType } from "libs/common/src/constants/others.constant";
 import { RoleName } from "libs/common/src/constants/role.constant";
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
@@ -176,6 +176,7 @@ export class ManagerRepository {
                 }
             })
         } else {
+
             const withdrawalRequest = await this.prismaService.withdrawalRequest.update({
                 where: {
                     id
@@ -308,82 +309,92 @@ export class ManagerRepository {
     async updateReport(body: UpdateProviderReportType, userId: number) {
 
         const { id, reporterId, amount, reporterType, paymentTransactionId, ...rest } = body;
-        return this.prismaService.$transaction(async (tx) => {
-            await tx.wallet.update({
-                where: { userId: reporterId },
-                data: { balance: { increment: amount } },
-                select: { id: true },
-            });
+        if (body.status === ReportStatus.RESOLVED) {
+            return this.prismaService.$transaction(async (tx) => {
+                await tx.wallet.update({
+                    where: { userId: reporterId },
+                    data: { balance: { increment: amount } },
+                    select: { id: true },
+                });
 
 
-            const report = await tx.bookingReport.update({
-                where: { id },
-                data: {
+                const report = await tx.bookingReport.update({
+                    where: { id },
+                    data: {
 
-                    ...rest,
-                    reviewedAt: new Date(),
-                    reviewedById: userId,
-                    PaymentTransaction: {
-                        create: {
-                            gateway: 'INTERNAL_WALLET',
-                            status: PaymentTransactionStatus.REFUNDED,
-                            userId: body.reporterId,
-                            transactionDate: new Date(),
-                            amountIn: amount,
-                            referenceNumber: 'REFUND_RB',
-                            transactionContent: 'Hoàn tiền báo cáo dịch vụ',
+                        ...rest,
+                        reviewedAt: new Date(),
+                        reviewedById: userId,
+                        PaymentTransaction: {
+                            create: {
+                                gateway: 'INTERNAL_WALLET',
+                                status: PaymentTransactionStatus.REFUNDED,
+                                userId: body.reporterId,
+                                transactionDate: new Date(),
+                                amountIn: amount,
+                                referenceNumber: 'REFUND_RB',
+                                transactionContent: 'Hoàn tiền báo cáo dịch vụ',
+                            },
                         },
                     },
-                },
-                select: {
-                    id: true,
-                    status: true,
-                    reviewedAt: true,
-                    reviewedById: true,
-                    bookingId: true,
+                    select: {
+                        id: true,
+                        status: true,
+                        reviewedAt: true,
+                        reviewedById: true,
+                        bookingId: true,
 
 
-                },
-            });
-            const trx = await tx.transaction.findUnique({
-                where: { bookingId: report.bookingId }
-            });
-            if (reporterType === RoleName.Customer) {
-                if (trx) {
-                    return await Promise.all([
-                        tx.transaction.update({
-                            where: {
+                    },
+                });
+                const trx = await tx.transaction.findUnique({
+                    where: { bookingId: report.bookingId }
+                });
+                if (reporterType === RoleName.Customer) {
+                    if (trx) {
+                        return await Promise.all([
+                            tx.transaction.update({
+                                where: {
 
-                                bookingId: report.bookingId
-                            }
-                            , data: {
-                                status: PaymentStatus.REFUNDED
-                            }
-                        })
-                        , tx.paymentTransaction.update({
-                            where: {
-                                id: paymentTransactionId
-                            },
-                            data: {
-                                status: PaymentTransactionStatus.REFUNDED
-                            }
-                        })])
+                                    bookingId: report.bookingId
+                                }
+                                , data: {
+                                    status: PaymentStatus.REFUNDED
+                                }
+                            })
+                            , tx.paymentTransaction.update({
+                                where: {
+                                    id: paymentTransactionId
+                                },
+                                data: {
+                                    status: PaymentTransactionStatus.REFUNDED
+                                }
+                            })])
+
+                    }
+                    return await tx.paymentTransaction.update({
+                        where: {
+                            id: body.paymentTransactionId
+                        },
+                        data: {
+                            status: PaymentTransactionStatus.REFUNDED
+                        }
+                    })
 
                 }
-                return await tx.paymentTransaction.update({
-                    where: {
-                        id: body.paymentTransactionId
-                    },
-                    data: {
-                        status: PaymentTransactionStatus.REFUNDED
-                    }
-                })
 
+
+                return report;
+            });
+        }
+        return this.prismaService.bookingReport.update({
+            where: {
+                id: body.id
+            }, data: {
+                ...rest
             }
+        })
 
-
-            return report;
-        });
     }
     async getListProvider(query: GetListProviderQueryType) {
         const where: Prisma.ServiceProviderWhereInput = {};
