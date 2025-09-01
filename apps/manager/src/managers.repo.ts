@@ -259,6 +259,11 @@ export class ManagerRepository {
             include: {
                 Booking: {
                     include: {
+                        ServiceRequest: {
+                            include: {
+                                PaymentTransaction: true
+                            }
+                        },
                         Proposal: {
                             include: {
                                 ProposalItem: true
@@ -332,7 +337,6 @@ export class ManagerRepository {
                     reviewedAt: true,
                     reviewedById: true,
                     bookingId: true,
-                    Booking: true
 
 
                 },
@@ -360,16 +364,16 @@ export class ManagerRepository {
                                 status: PaymentTransactionStatus.REFUNDED
                             }
                         })])
-                    await tx.paymentTransaction.update({
-                        where: {
-                            id: body.paymentTransactionId
-                        },
-                        data: {
-                            status: PaymentTransactionStatus.REFUNDED
-                        }
-                    })
-                }
 
+                }
+                await tx.paymentTransaction.update({
+                    where: {
+                        id: body.paymentTransactionId
+                    },
+                    data: {
+                        status: PaymentTransactionStatus.REFUNDED
+                    }
+                })
 
             }
 
