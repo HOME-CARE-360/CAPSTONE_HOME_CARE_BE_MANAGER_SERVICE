@@ -317,9 +317,8 @@ export class ManagerRepository {
                         create: {
                             gateway: 'INTERNAL_WALLET',
                             status: PaymentTransactionStatus.REFUNDED,
-                            userId,
+                            userId: body.reporterId,
                             transactionDate: new Date(),
-                            amountOut: amount,
                             amountIn: amount,
                             referenceNumber: 'REFUND_RB',
                             transactionContent: 'Hoàn tiền báo cáo dịch vụ',
