@@ -102,7 +102,7 @@ export class ManagersService {
       if (body.amount == null || body.reporterId == null) {
         throw AmountAndReporterIdAreRequiredException;
       }
-      if (body.reporterType === RoleName.Customer || !body.paymentTransactionId) {
+      if (body.reporterType === RoleName.Customer && !body.paymentTransactionId) {
         throw PaymentTransactionIdIsRequiredException
       }
       if (!user || !user.Wallet) {
