@@ -305,7 +305,7 @@ export class ManagerRepository {
 
     async updateReport(body: UpdateProviderReportType, userId: number) {
 
-        const { id, reporterId, amount, reporterType, ...rest } = body;
+        const { id, reporterId, amount, reporterType, paymentTransactionId, ...rest } = body;
         return this.prismaService.$transaction(async (tx) => {
             await tx.wallet.update({
                 where: { userId: reporterId },
@@ -360,7 +360,7 @@ export class ManagerRepository {
                         })
                         , tx.paymentTransaction.update({
                             where: {
-                                id: body.paymentTransactionId
+                                id: paymentTransactionId
                             },
                             data: {
                                 status: PaymentTransactionStatus.REFUNDED
