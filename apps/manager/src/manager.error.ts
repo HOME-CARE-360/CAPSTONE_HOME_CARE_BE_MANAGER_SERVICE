@@ -49,6 +49,11 @@ export const AmountAndReporterIdAreRequiredException = new RpcException(
         { message: 'amount and reporterId are required when status is RESOLVED', path: ['status'] },
     ]),
 );
+export const PaymentTransactionIdIsRequiredException = new RpcException(
+    new UnprocessableEntityException([
+        { message: 'Payment transaction id is required when status report type is customer', path: ['status'] },
+    ]),
+);
 export const ReporterWalletNotFoundException = new RpcException(
     new NotFoundException([
         { message: 'Reporter wallet not found', path: ['reporterId'] }

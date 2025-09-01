@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from 'libs/common/src/request-response-type/manager/manager.model';
 
-import { AmountAndReporterIdAreRequiredException, ReporterWalletNotFoundException, ReportHasAlreadyBeenResolvedException, ReportNotFoundException, SameVerificationStatusException } from './manager.error';
+import { AmountAndReporterIdAreRequiredException, PaymentTransactionIdIsRequiredException, ReporterWalletNotFoundException, ReportHasAlreadyBeenResolvedException, ReportNotFoundException, SameVerificationStatusException } from './manager.error';
 import { ManagerRepository } from './managers.repo';
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
@@ -14,6 +14,7 @@ import { BookingReport, ReportStatus, User, Wallet } from '@prisma/client';
 import { GetServicesForManagerQueryType } from 'libs/common/src/request-response-type/service/services.model';
 import { SharedBookingReportRepository } from 'libs/common/src/repositories/shared-booking-report.repo';
 import { SharedUserRepository } from 'libs/common/src/repositories/shared-user.repo';
+import { RoleName } from 'libs/common/src/constants/role.constant';
 
 @Injectable()
 export class ManagersService {
@@ -100,6 +101,9 @@ export class ManagersService {
       }
       if (body.amount == null || body.reporterId == null) {
         throw AmountAndReporterIdAreRequiredException;
+      }
+      if (body.reporterType === RoleName.Customer || !body.paymentTransactionId) {
+        throw PaymentTransactionIdIsRequiredException
       }
       if (!user || !user.Wallet) {
         throw ReporterWalletNotFoundException;

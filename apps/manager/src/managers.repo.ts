@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentStatus, PaymentTransactionStatus, Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
 import { OrderByType, SortBy, SortByType } from "libs/common/src/constants/others.constant";
+import { RoleName } from "libs/common/src/constants/role.constant";
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
 import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
@@ -303,7 +304,8 @@ export class ManagerRepository {
     }
 
     async updateReport(body: UpdateProviderReportType, userId: number) {
-        const { id, reporterId, amount, ...rest } = body;
+
+        const { id, reporterId, amount, reporterType, ...rest } = body;
         return this.prismaService.$transaction(async (tx) => {
             await tx.wallet.update({
                 where: { userId: reporterId },
@@ -344,7 +346,7 @@ export class ManagerRepository {
             const trx = await tx.transaction.findUnique({
                 where: { bookingId: report.bookingId }
             });
-            if (body.paymentTransactionId) {
+            if (reporterType === RoleName.Customer) {
                 if (trx) {
                     return await Promise.all([
                         tx.transaction.update({

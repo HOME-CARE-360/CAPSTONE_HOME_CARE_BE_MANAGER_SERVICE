@@ -89,8 +89,6 @@ export class ManagersController {
   @MessagePattern({ cmd: "update-report" })
   @ZodSerializerDto(MessageResDTO)
   async updateReport(@Payload() { data, userId }: { data: UpdateProviderReportType, userId: number }) {
-    console.log(data);
-
     return await this.managersService.updateReport(data, userId)
 
   }
