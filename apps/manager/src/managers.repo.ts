@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PaymentTransactionStatus, Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
+import { PaymentStatus, PaymentTransactionStatus, Prisma, ServiceStatus, WithdrawalStatus } from "@prisma/client";
 import { OrderByType, SortBy, SortByType } from "libs/common/src/constants/others.constant";
 import { GetListProviderQueryType, UpdateStatusProviderBodyType, UpdateStatusServiceBodyType } from "libs/common/src/request-response-type/manager/manager.model";
 import { GetListReportQueryType, UpdateProviderReportType } from "libs/common/src/request-response-type/report/report.model";
@@ -306,6 +306,7 @@ export class ManagerRepository {
                 select: { id: true },
             });
 
+
             const report = await tx.bookingReport.update({
                 where: { id },
                 data: {
@@ -330,9 +331,48 @@ export class ManagerRepository {
                     status: true,
                     reviewedAt: true,
                     reviewedById: true,
+                    bookingId: true,
+                    Booking: true
+
 
                 },
             });
+            const trx = await tx.transaction.findUnique({
+                where: { bookingId: report.bookingId }
+            });
+            if (body.paymentTransactionId) {
+                if (trx) {
+                    await Promise.all([
+                        tx.transaction.update({
+                            where: {
+
+                                bookingId: report.bookingId
+                            }
+                            , data: {
+                                status: PaymentStatus.REFUNDED
+                            }
+                        })
+                        , tx.paymentTransaction.update({
+                            where: {
+                                id: body.paymentTransactionId
+                            },
+                            data: {
+                                status: PaymentTransactionStatus.REFUNDED
+                            }
+                        })])
+                    await tx.paymentTransaction.update({
+                        where: {
+                            id: body.paymentTransactionId
+                        },
+                        data: {
+                            status: PaymentTransactionStatus.REFUNDED
+                        }
+                    })
+                }
+
+
+            }
+
 
             return report;
         });

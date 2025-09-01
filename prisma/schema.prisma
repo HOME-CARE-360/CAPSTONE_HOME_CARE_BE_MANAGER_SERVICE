@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-    // output        = "../node_modules/.prisma/client"
+//  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -331,13 +331,13 @@ model PaymentTransaction {
   transactionContent  String?
   body                String?
   createdAt           DateTime                 @default(now())
-  serviceRequestId    Int?                     @unique
+  serviceRequestId    Int?
   status              PaymentTransactionStatus
   userId              Int?
   withdrawalRequestId Int?                     @unique
   bookingReportId     Int?                     @unique
   BookingReport       BookingReport?           @relation(fields: [bookingReportId], references: [id])
-  ServiceRequest      ServiceRequest?          @relation(fields: [serviceRequestId], references: [id])
+  ServiceRequest      ServiceRequest?          @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
   WithdrawalRequest   WithdrawalRequest?       @relation(fields: [withdrawalRequestId], references: [id])
 }
 
@@ -431,22 +431,22 @@ model ServiceItem {
 }
 
 model ServiceRequest {
-  id                 Int                 @id @default(autoincrement())
+  id                 Int                  @id @default(autoincrement())
   customerId         Int
   providerId         Int
   note               String?
   preferredDate      DateTime
-  status             RequestStatus       @default(PENDING)
-  createdAt          DateTime            @default(now())
+  status             RequestStatus        @default(PENDING)
+  createdAt          DateTime             @default(now())
   updatedAt          DateTime
-  location           String              @db.VarChar(500)
+  location           String               @db.VarChar(500)
   phoneNumber        String
   categoryId         Int
   Booking            Booking?
-  PaymentTransaction PaymentTransaction?
-  Category           Category            @relation(fields: [categoryId], references: [id])
-  CustomerProfile    CustomerProfile     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  ServiceProvider    ServiceProvider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  PaymentTransaction PaymentTransaction[]
+  Category           Category             @relation(fields: [categoryId], references: [id])
+  CustomerProfile    CustomerProfile      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ServiceProvider    ServiceProvider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@index([status])
 }
@@ -638,34 +638,28 @@ model BookingReport {
 }
 
 model ExternalProduct {
-  id               Int               @id @default(autoincrement())
-  title            String
-  url              String            @db.VarChar(1000)
-  imageUrl         String?
-  brand            String?
-  model            String?
-  categoryId       Int?
-  price            Float?
-  currency         String?           @default("VND")
-  discountPct      Int?
-  promoEndsAt      DateTime?
-  source           String            @db.VarChar(100)
-  releaseDate      DateTime?
-  scrapedAt        DateTime          @default(now())
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime
-  AssetSuggestion  AssetSuggestion[]
-  ProductEmbedding ProductEmbedding?
-
-  @@unique([source, url])
-  @@index([categoryId, scrapedAt])
-}
-
-model ProductEmbedding {
-  productId       Int             @id
-  vector          Json
+  id              Int               @id @default(autoincrement())
+  title           String
+  url             String            @db.VarChar(1000)
+  imageUrl        String?
+  brand           String?
+  model           String?
+  categoryId      Int?
+  price           Float?
+  currency        String?           @default("VND")
+  discountPct     Int?
+  promoEndsAt     DateTime?
+  source          String            @db.VarChar(100)
+  releaseDate     DateTime?
+  scrapedAt       DateTime          @default(now())
+  createdAt       DateTime          @default(now())
   updatedAt       DateTime
-  ExternalProduct ExternalProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       String?           @db.VarChar(100)
+  AssetSuggestion AssetSuggestion[]
+
+  @@unique([source, productId], map: "external_product_source_productId")
+  @@unique([source, url], map: "external_product_source_url")
+  @@index([categoryId, scrapedAt])
 }
 
 model n8nchathistory {
@@ -675,12 +669,13 @@ model n8nchathistory {
 }
 
 model SystemConfig {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
   value     String?
   type      String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   updatedAt DateTime
+  expiresAt DateTime?
 }
 
 model n8n_chat_histories {
@@ -690,9 +685,10 @@ model n8n_chat_histories {
 }
 
 model n8n_data {
-  id         Int       @id @default(autoincrement())
-  content    String?
-  created_at DateTime? @default(now()) @db.Timestamp(6)
+  id        Int                    @id @default(autoincrement())
+  text      String?
+  metadata  Json?
+  embedding Unsupported("vector")?
 }
 
 enum UserStatus {
@@ -736,6 +732,7 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  REFUNDED
 }
 
 enum PaymentMethod {
@@ -852,6 +849,8 @@ enum RecommendationStatus {
   SAVED
   DISMISSED
   PURCHASED
+  STALE
+  LIKED
 }
 
 enum ReporterType {
