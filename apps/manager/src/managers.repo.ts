@@ -270,7 +270,11 @@ export class ManagerRepository {
                         },
                         Proposal: {
                             include: {
-                                ProposalItem: true
+                                ProposalItem: {
+                                    include: {
+                                        Service: true
+                                    }
+                                }
                             }
                         }
                     }
