@@ -13,7 +13,6 @@ export const UpdateProviderReportSchema = z.object({
     reporterType: z.string(),
     note: z.string().max(1000).optional(),
     amount: z.number().optional(),
-    paymentTransactionId: z.number().int().optional(),
     reporterId: z.number().optional(),
 });
 export const GetListReportQuerySchema = z.object({
