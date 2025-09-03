@@ -184,11 +184,6 @@ export class ManagerRepository {
                     ...rest,
                     processedAt: new Date(),
                     processedById: userId,
-                    PaymentTransaction: {
-                        update: {
-                            status: PaymentTransactionStatus.SUCCESS
-                        }
-                    }
                 },
             })
             return withdrawalRequest
